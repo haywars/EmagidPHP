@@ -31,7 +31,7 @@ abstract class Db{
 	/** 
 	* @var Array of fields . used for insert / update 
 	*/ 
-	protected $fields = array(); 
+	public $fields = array(); 
 
 
 	/**
@@ -245,15 +245,16 @@ abstract class Db{
 	function getFieldsList () {
 		$arr = array();
 
-		foreach ($this->fields as $fld) {
+		foreach ($this->fields as $key=>$val) {
 
-			if(is_array($fld)){
-				$arr[] = $fld['name'];
-			}else{
-				$arr[] = $fld;
-			}
+			if($key)
+				$arr[]  = $key; 
+			else 
+				$arr[] = $val ; 
+
 		}
 
+		return $arr ;
 	}
 
 	/**

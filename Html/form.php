@@ -188,5 +188,42 @@ class Form {
 
 	}
 
+
+
+	 function editorFor($field_name, $options = [], $label ='' , $htmlObjects = []){
+
+	 	if(!isset($this->model->fields[$field_name])){
+
+	 		// no special setting for that field , return a text box setting :
+
+	 		return $this->textBoxFor($field_name, $options = [], $label , $htmlObjects);
+
+	 	}
+
+	 	$fld=$this->model->fields[$field_name];
+
+	 	switch($fld['type']){
+	 		case 'textarea': 
+	 			return $this->textAreaFor($field_name, $htmlObjects);
+	 			break;
+		}
+
+		if(isset($fld['type'])){
+			$htmlObjects['type'] = $fld['type'];
+		}
+
+		if($fld['required']){
+			$htmlObjects['required'] = 'required';
+
+		}
+
+ 		return $this->textBoxFor($field_name, $htmlObjects);
+
+//		
+
+
+		
+	}
+
 }
 ?>
