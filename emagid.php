@@ -8,6 +8,11 @@ namespace Emagid;
 * Base class for eMagid libraries 
 */
 class Emagid{
+	/** 
+	* @var Object 
+	* 	page object, will contain SEO , data and other page specific handlers
+	*/ 
+	public $page = null  ;
 
 	/** 
 	* @var Determine whether to include debug module or not .
@@ -35,6 +40,16 @@ class Emagid{
 	*/
 	public $controller ;
 
+	/**
+	* @var string acive template's name
+	*/
+	public $template = null ;
+
+
+	/**
+	* @var int default error_reporting value 
+	*/
+	private static $default_error_reporting = 0 ;
 
 
 	/**
@@ -56,9 +71,12 @@ class Emagid{
 			require_once($this->base_path.'libs/Emagid/_includes/kint/Kint.class.php');
 		}
 		
+		$this->page = new \Emagid\Page\Page(); 
 
-		global $emagid ;
 
+		if($this->debug){
+			//set_error_handler('\Emagid\Emagid::emagidErrorHandler');
+		}
 
 	}
 
@@ -149,7 +167,24 @@ class Emagid{
 
 	
 
+	/**
+	* Initializer the library's internal debugger and prevent PHP errors from showing 
+	*/
+	static function startDebugger(){
+		self::$default_error_reporting = ini_get('error_reporting');
 
+		error_reporting(0);
+	}
+
+
+
+
+	static function emagidErrorHandler($errno, $errstr, $errfile, $errline){
+		
+		
+\Kint::trace();
+		
+	}
 
 	
 

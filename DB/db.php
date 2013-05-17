@@ -31,7 +31,7 @@ abstract class Db{
 	/** 
 	* @var Array of fields . used for insert / update 
 	*/ 
-	protected $fields = array(); 
+	public $fields = array(); 
 
 
 	/**
@@ -43,6 +43,13 @@ abstract class Db{
 	* @var Array relationships with other tables
 	*/
 	public $relationships = []  ;
+
+
+	function __construct($params){
+		if(is_int($params)){ // safe to assume that the user wanted to load a single record 
+			$this->getItem($params);
+		}
+	}
 
 
 	/**
@@ -70,6 +77,28 @@ abstract class Db{
 	}
 
 
+	/**
+	* count rows in table.
+	* @param $params Array - conditions 
+	*		 $params = array(
+	*						"where" => array(field_name => handle, field_name => handle) //where condition for "=" and "AND"  only, NO "OR", "LIKE" or anyothers 
+	*						);
+	* @return int number of records in the table 
+	*/
+	function getCount($params = array()){
+
+		$db = $this->getConnection(); 
+
+		$sql = "SELECT count(*) FROM $this->table_name";
+	
+		// apply where conditions
+		if(isset($params['where'])){ // apply where conditions
+			$sql.=" WHERE ". $this->buildWhere($params['where']);
+		}
+			
+		
+		return $db->get_var($sql);
+	}
 	
 
 
@@ -105,9 +134,10 @@ abstract class Db{
 			}
 			
 			// apply order and sort
-			isset($params['orderBy'])? $orderBy = $params['orderBy'] : $orderBy = "id";
-			isset($params['sort'])? $sort = $params['sort'] : $sort = "ASC";
-			$sql.= " ORDER BY {$orderBy} {$sort}";
+
+			isset($params['orderBy'])? $orderBy = $params['orderBy'] : $orderBy = $this->fld_id." DESC";
+			
+			$sql.= " ORDER BY {$orderBy}";
 			
 			// apply pagination
 			if(isset($params['limit'])){
@@ -130,6 +160,8 @@ abstract class Db{
 				$obj = new $cls ; 
 
 				clone_into($item, $obj);
+
+				$obj->id=$item->{$this->fld_id};
 
 				array_push($list, $obj);
 
@@ -175,6 +207,8 @@ abstract class Db{
 			// assign the values to the current object. 
 			// required for the update/insert functionality .
 			$arr = object_to_array($row);
+
+			$this->id = $row->{$this->fld_id};
 			
 			foreach($arr as $key => $val){
 				$this->{$key}=$val;
@@ -202,6 +236,25 @@ abstract class Db{
 
 
 		return $db->get_row($sql);
+	}
+
+
+	/**
+	* Returns the list of field names, in case the array is complex 
+	*/
+	function getFieldsList () {
+		$arr = array();
+
+		foreach ($this->fields as $key=>$val) {
+
+			if($key)
+				$arr[]  = $key; 
+			else 
+				$arr[] = $val ; 
+
+		}
+
+		return $arr ;
 	}
 
 	/**

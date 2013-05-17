@@ -1,5 +1,5 @@
 <?php 
-namespace Emagid;
+namespace Emagid\Page;
 
 /**
 * base page class, handles template and pages 
@@ -10,6 +10,17 @@ class Page{
 	* @var array[] list of css documents to load
 	*/
 	public $css_documents;
+
+	/**
+	* @var Object
+	* 		SEO object - metatags, title ,etc... 
+	*/
+	public $seo;
+
+
+	public function __construct(){
+		$this->seo = (object)['title'=>'', 'description'=>''];
+	}
 
 	public function loadCss(){
 		require_once("cssmin-v3.0.1.php");
@@ -26,6 +37,17 @@ class Page{
 				printf("<link href=\"%s\" rel=\"stylesheet\" type=\"text/css\" />",$css);
 			}
 		}
+	}
+
+
+	/**
+	*	Load the view from $emagid->mvc . 
+	*/
+	public function renderBody(){
+		global $emagid; 
+
+		dd($emagid->mvc); 
+
 	}
 
 	/**
