@@ -1,6 +1,7 @@
 <?php 
-
 namespace Emagid\Mvc;
+
+use Emagid\Emagid;
 
 
 /**
@@ -37,6 +38,10 @@ class Mvc{
 
 	/**
 	* @var array - routing table allows the user to  add new "translators " for routes
+	* 				- name : name for the route
+	*				- pattern : using regular expression
+	*				- controller
+	*				- action
 	*/
 	private static $routes = []; 
 
@@ -46,6 +51,8 @@ class Mvc{
 	* 
 	* @param array $arr 
 	* 		'root' string - the absolute URI of the current site, should always end with '/' (e.g.: '/', '/mysite/')
+	*
+	* @todo  Add support for arguments to the routing table.
 	*/
 	public static function load(array $arr = []){
 
@@ -63,6 +70,9 @@ class Mvc{
 		if(isset($arr['default_view']))
 			self::$default_view=$arr['default_view'];
 
+		if(isset($arr['routes'])){
+			self::$routes=$arr['routes'];
+		}
 
 
 		$uri = $_SERVER['REQUEST_URI'];
@@ -85,28 +95,53 @@ class Mvc{
 			$uri = substr($uri, 1);
 		}
 
-			
+
+		
+
+		$route_found = false; 
+
+		if(self::$routes && count(self::$routes)>0 ){
+			foreach (self::$routes as $route ) {
+
+				if($uri == $route['pattern']){
+
+					$segments = [];
+
+					$route_found = true; 
+
+					$controller_name = $route['controller'] ;
+					$view_name = $route['action'];
+
+					break;
+				}
+				
+			}
+		}
 
 
 
-		$segments = $uri != '' && $uri != '/' ? explode('/', $uri) : array();
+		if(!$route_found){
+
+
+			$segments = $uri != '' && $uri != '/' ? explode('/', $uri) : array();
 
 
 
-		$controller_name = self::getAndPop($segments) ; 
+			$controller_name = self::getAndPop($segments) ; 
 
 
-		if(!$controller_name ) {
-				// if controller doesn't exist, view won't exist neigther .
-				$controller_name = self::$default_controller ;
-				$view_name = self::$default_view;
-		}else {
-			// controller exists, might have view definition, and parameters .
-			$view_name = self::getAndPop($segments);
+			if(!$controller_name ) {
+					// if controller doesn't exist, view won't exist neigther .
+					$controller_name = self::$default_controller ;
+					$view_name = self::$default_view;
+			}else {
+				// controller exists, might have view definition, and parameters .
+				$view_name = self::getAndPop($segments);
 
-			if(!$view_name)
-				$view_name = self::$default_view;
-			
+				if(!$view_name)
+					$view_name = self::$default_view;
+				
+			}
 		}
 
 		// load the controller 
@@ -117,8 +152,7 @@ class Mvc{
 		$emagid->controller->view = $view_name; 
 
 		call_user_func_array(array(&$emagid->controller, $view_name),$segments);
-
-		//$emagid->controller->$view_name(); 
+		
 
 	}
 
@@ -175,6 +209,22 @@ class Mvc{
 
    		return stripos($haystack, $needle, 0) === 0;
 	}
+
+
+	/** 
+	* Config routes, allowing to override the url when necessary 
+	*
+	* @param array $routingTable 
+	* 				- name : name for the route
+	*				- pattern : using regular expression
+	*				- controller
+	*				- view
+	*
+	* @todo expand functionality and add support for route variables. 
+	*/
+	// static function registerRoutes ($routingTable) {
+	// 	self::$routes = $routingTable;
+	// }
 
 
 	

@@ -47,6 +47,12 @@ class Emagid{
 
 
 	/**
+	* @var int default error_reporting value 
+	*/
+	private static $default_error_reporting = 0 ;
+
+
+	/**
 	* Defualt constructor 
 	*
 	* $params Array basic settings, such as directories, DB connection etc... 
@@ -67,6 +73,10 @@ class Emagid{
 		
 		$this->page = new \Emagid\Page\Page(); 
 
+
+		if($this->debug){
+			//set_error_handler('\Emagid\Emagid::emagidErrorHandler');
+		}
 
 	}
 
@@ -157,7 +167,24 @@ class Emagid{
 
 	
 
+	/**
+	* Initializer the library's internal debugger and prevent PHP errors from showing 
+	*/
+	static function startDebugger(){
+		self::$default_error_reporting = ini_get('error_reporting');
 
+		error_reporting(0);
+	}
+
+
+
+
+	static function emagidErrorHandler($errno, $errstr, $errfile, $errline){
+		
+		
+\Kint::trace();
+		
+	}
 
 	
 

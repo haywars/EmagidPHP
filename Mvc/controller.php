@@ -66,7 +66,9 @@ abstract class Controller{
 
 
 
-		include($path);
+		if(!include($path)){
+			die("<h1>Failed to load the view : ".$path."</h1>");
+		}
 	}
 
 }

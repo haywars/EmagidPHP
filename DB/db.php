@@ -70,11 +70,33 @@ abstract class Db{
 	}
 
 
+	/**
+	* count rows in table.
+	* @param $params Array - conditions 
+	*		 $params = array(
+	*						"where" => array(field_name => handle, field_name => handle) //where condition for "=" and "AND"  only, NO "OR", "LIKE" or anyothers 
+	*						);
+	* @return int number of records in the table 
+	*/
+	function getCount($params = array()){
+
+		$db = $this->getConnection(); 
+
+		$sql = "SELECT count(*) FROM $this->table_name";
+	
+		// apply where conditions
+		if(isset($params['where'])){ // apply where conditions
+			$sql.=" WHERE ". $this->buildWhere($params['where']);
+		}
+			
+		
+		return $db->get_var($sql);
+	}
 	
 
 
 
-/**
+	/**
 	* get list from a table
 	* @param $params Array - conditions 
 	*		 $params = array(
@@ -105,9 +127,10 @@ abstract class Db{
 			}
 			
 			// apply order and sort
-			isset($params['orderBy'])? $orderBy = $params['orderBy'] : $orderBy = "id";
-			isset($params['sort'])? $sort = $params['sort'] : $sort = "ASC";
-			$sql.= " ORDER BY {$orderBy} {$sort}";
+
+			isset($params['orderBy'])? $orderBy = $params['orderBy'] : $orderBy = $this->fld_id." DESC";
+			
+			$sql.= " ORDER BY {$orderBy}";
 			
 			// apply pagination
 			if(isset($params['limit'])){
@@ -202,6 +225,24 @@ abstract class Db{
 
 
 		return $db->get_row($sql);
+	}
+
+
+	/**
+	* Returns the list of field names, in case the array is complex 
+	*/
+	function getFieldsList () {
+		$arr = array();
+
+		foreach ($this->fields as $fld) {
+
+			if(is_array($fld)){
+				$arr[] = $fld['name'];
+			}else{
+				$arr[] = $fld;
+			}
+		}
+
 	}
 
 	/**
