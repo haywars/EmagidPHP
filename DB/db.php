@@ -45,6 +45,13 @@ abstract class Db{
 	public $relationships = []  ;
 
 
+	function __construct($params){
+		if(is_int($params)){ // safe to assume that the user wanted to load a single record 
+			$this->getItem($params);
+		}
+	}
+
+
 	/**
 	* Get or creates the db object
 	* 
@@ -154,6 +161,8 @@ abstract class Db{
 
 				clone_into($item, $obj);
 
+				$obj->id=$item->{$this->fld_id};
+
 				array_push($list, $obj);
 
 			}
@@ -198,6 +207,8 @@ abstract class Db{
 			// assign the values to the current object. 
 			// required for the update/insert functionality .
 			$arr = object_to_array($row);
+
+			$this->id = $row->{$this->fld_id};
 			
 			foreach($arr as $key => $val){
 				$this->{$key}=$val;
